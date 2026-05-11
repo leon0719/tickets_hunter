@@ -1,0 +1,69 @@
+[project]
+name = "tickets-hunter"
+version = "0.1.0"
+description = "Tickets hunter automation (fork)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "certifi>=2026.1.4",
+    "chardet>=5.2.0",
+    "cryptography>=46.0.4",
+    "ddddocr>=1.5.6",
+    "idna>=3.11",
+    "looseversion>=1.3.0",
+    "numpy>=2.2.6",
+    "onnxruntime>=1.23.1",
+    "opencv-python>=4.12.0.88",
+    "pillow>=11.3.0",
+    "playsound==1.2.2",
+    "pyperclip>=1.11.0",
+    "requests>=2.32.5",
+    "tornado>=6.5.4",
+    "urllib3>=2.6.3",
+    "zendriver>=0.15.3",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+exclude = [
+    ".venv",
+    "build_scripts",
+    "src/www",
+    "src/__pycache__",
+    "src/platforms/__pycache__",
+]
+
+[tool.ruff.lint]
+select = [
+    "F",      # Pyflakes
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "RUF",    # Ruff-specific
+]
+ignore = [
+    "E501",   # line too long (existing code has long strings/JS literals)
+    "E402",   # module level import not at top (sys.path manipulation in entry)
+    "E701",   # multiple statements on one line
+    "E722",   # bare except (used extensively in existing code)
+    "B007",   # loop variable not used in body
+    "B008",   # function call in default argument
+    "B904",   # raise without from in except (not critical)
+    # Chinese language support
+    "RUF001", # ambiguous unicode in strings
+    "RUF002", # ambiguous unicode in docstrings
+    "RUF003", # ambiguous unicode in comments
+    "RUF012", # mutable class attributes
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
