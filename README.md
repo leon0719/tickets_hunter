@@ -190,3 +190,79 @@ tickets_hunter/
 **祝您搶票成功！** 🎉
 
 ---
+
+## 🛠️ Fork 維護工作流程（個人筆記）
+
+本段為個人 fork（`leon0719/tickets_hunter`）的同步流程紀錄，與原專案功能無關。
+目的：可長期跟上游 `bouob/tickets_hunter` 的更新，同時保留自己的修改。
+
+### Remote 結構
+
+```
+origin    git@github.com:leon0719/tickets_hunter.git    (我的 fork, 可讀寫)
+upstream  https://github.com/bouob/tickets_hunter.git   (原作者, 只讀)
+```
+
+新機器初次設定：
+
+```bash
+git clone git@github.com:leon0719/tickets_hunter.git
+cd tickets_hunter
+git remote add upstream https://github.com/bouob/tickets_hunter.git
+```
+
+### 分支策略
+
+| 分支 | 用途 | 規則 |
+| --- | --- | --- |
+| `main` | 上游的本地鏡像 | **永遠不在此 commit**，只負責同步 upstream |
+| `custom` | 個人開發分支 | 所有自訂修改都放這裡 |
+
+```
+upstream/main  ──●──●──●──●──●──●──   (原作者持續推進)
+                          ↓ fetch + ff-only
+local main     ──●──●──●──●──●──●──   (純鏡像)
+                                   ↘ rebase onto
+custom         ────────────────────●──●──●  (我的修改)
+```
+
+### 日常流程
+
+#### A. 同步上游到本機 main
+
+```bash
+./sync-upstream.sh
+```
+
+腳本會：切到 `main` → `fetch upstream` → `merge --ff-only` → `push origin main` → 切回原分支。
+
+腳本內建工作目錄乾淨檢查與 remote 存在檢查，失敗會中止並保留原狀態。
+
+#### B. 把上游進度套到 custom 分支
+
+```bash
+git checkout custom
+git rebase main
+git push --force-with-lease origin custom
+```
+
+`--force-with-lease` 比 `--force` 安全：若遠端 `custom` 被別人推過會擋下來。
+
+### 自訂修改的放置原則
+
+為降低 rebase 衝突：
+
+1. **新增檔案 > 修改現有檔案**：自訂功能寫在新檔案（例如 `src/my_line.py`）。
+2. **修改入口檔案僅一行**：在 `src/nodriver_tixcraft.py` 頂端加 `import my_line` 觸發 monkey-patch，避免動到平台模組內部。
+3. **設定走環境變數或獨立 JSON**：不要改 `src/settings.py`（上游常動的大檔），用 env var 或 `~/.config/tickets_hunter_xxx.json`。
+
+### 常見錯誤對照
+
+| 錯誤訊息 | 原因 | 處理 |
+| --- | --- | --- |
+| `fatal: Not possible to fast-forward, aborting.` | `main` 上有自己的 commit | `git log upstream/main..main` 找出來 → cherry-pick 到 custom → `git reset --hard upstream/main` |
+| `error: Your local changes ... would be overwritten` | 切換分支前有未 commit 的修改 | `git stash` 或先 commit |
+| `Everything up-to-date`（push origin main） | 上游本次沒新東西 | 正常，可忽略 |
+| rebase 出現 conflict | 自訂修改與上游動到同一段 | 解完 → `git add` → `git rebase --continue`，下次評估是否能把修改搬到獨立檔案 |
+
+---
