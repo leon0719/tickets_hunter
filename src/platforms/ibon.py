@@ -128,7 +128,7 @@ async def register_ibon_alert_handler(tab, config_dict):
         if '/utk02/utk0206_' in current_url.lower():
             checkout_safe_keywords = [
                 "已售完", "售完", "別人搶先一步", "已無可配座位",
-                "無可配座位", "已被購買", "失敗", "錯誤", "無效",
+                "無可配座位", "已被購買",
             ]
             is_safe_to_dismiss = any(kw in event.message for kw in checkout_safe_keywords)
             if not is_safe_to_dismiss:

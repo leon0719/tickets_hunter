@@ -1171,7 +1171,8 @@ async def nodriver_kktix_dismiss_failure_modal(tab, config_dict):
             if result.get('clicked'):
                 debug.log("[KKTIX MODAL] Dismissed via button click")
                 return True
-            debug.log("[KKTIX MODAL] Could not find dismiss button")
+            debug.log("[KKTIX MODAL] Could not find dismiss button, signaling reload")
+            return True
     except Exception as exc:
         debug.log(f"[KKTIX MODAL] Error checking failure modal: {exc}")
     return False
@@ -2018,8 +2019,8 @@ async def nodriver_kktix_main(tab, url, config_dict):
                 debug.log("[KKTIX] Alert triggered reload, refreshing page...")
                 try:
                     await tab.reload()
-                except Exception:
-                    pass
+                except Exception as reload_exc:
+                    debug.log(f"[KKTIX] Alert-triggered reload failed: {reload_exc}")
                 # Reload is a recovery path, not a terminal state.
                 return False
 
@@ -2034,8 +2035,8 @@ async def nodriver_kktix_main(tab, url, config_dict):
                 debug.log("[KKTIX] Failure modal dismissed, refreshing page...")
                 try:
                     await tab.reload()
-                except Exception:
-                    pass
+                except Exception as reload_exc:
+                    debug.log(f"[KKTIX] Post-modal reload failed: {reload_exc}")
                 return False
 
             _state["start_time"] = time.time()
