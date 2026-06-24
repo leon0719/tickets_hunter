@@ -41,6 +41,10 @@ except Exception as exc:
     pass
 
 from nodriver_common import *
+# Persistent Chrome profile + skip-login patch (custom fork addition). Must follow
+# the `import *` above so it rebinds the name pulled into this namespace.
+import custom_profile
+get_extension_config = custom_profile.get_extension_config
 from platforms.facebook import *
 from platforms.fansigo import *
 from platforms.cityline import *
@@ -328,6 +332,9 @@ async def nodriver_goto_homepage(driver, config_dict):
                 debug.log(f"[FUNONE] Error setting cookie: {str(e)}")
 
     return tab
+
+# Install the skip-login wrapper now that nodriver_goto_homepage is defined.
+custom_profile.install_homepage_patch(sys.modules[__name__])
 
 async def nodrver_block_urls(tab, config_dict):
     """
